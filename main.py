@@ -22,7 +22,7 @@ if bytes_data is not None:
     with cent_co:
         st.image(img_array, width=300)
 
-    story, tags = get_data_from_clarify(description, bytes_data)
+    story, tags, audio = get_data_from_clarify(description, bytes_data)
 
     st.write(story)
 
@@ -34,3 +34,5 @@ if bytes_data is not None:
 
     tags_text = tags_text[:-1]
     st.write(tags_text)
+
+    st.audio(audio, format="audio/wav", start_time=0)

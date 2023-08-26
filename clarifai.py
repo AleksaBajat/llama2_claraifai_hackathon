@@ -1,16 +1,23 @@
-def Generate():
+import streamlit as st
+
+@st.cache_data
+def get_credentials():
     ##############################################################################
-    # In this section, we set the user authentication, app ID, workflow ID, and  
+    # In this section, we set the user authentication, app ID, workflow ID, and
     # image URL. Change these strings to run your own example.
     ##############################################################################
 
-    USER_ID = 'sdragan15'
-    # Your PAT (Personal Access Token) can be found in the portal under Authentification
-    PAT = '73028d3a4be24e18a7fdad1320333fb0'
-    APP_ID = 'cool_app'
-    # Change these to make your own predictions
-    WORKFLOW_ID = 'workflow-306cec'
-    IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg'
+    user_id = 'sdragan15'
+    # Your PAT (Personal Access Token)
+    pat = '73028d3a4be24e18a7fdad1320333fb0'
+    app_id = 'cool_app'
+    workflow_id = 'workflow-306cec'
+    image_url = 'https://samples.clarifai.com/metro-north.jpg'
+    return user_id, pat, app_id, workflow_id, image_url
+
+
+@st.cache_data
+def get_data_from_clarify(text: str, image: bytes) -> str:
 
     ##########################################################################
     # YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
@@ -23,19 +30,22 @@ def Generate():
     channel = ClarifaiChannel.get_grpc_channel()
     stub = service_pb2_grpc.V2Stub(channel)
 
-    metadata = (('authorization', 'Key ' + PAT),)
+    user_id, pat, app_id, workflow_id, image_url = get_credentials()
 
-    userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID) # The userDataObject is required when using a PAT
+    metadata = (('authorization', 'Key ' + pat),)
+
+    user_data_object = resources_pb2.UserAppIDSet(user_id=user_id,
+                                                app_id=app_id)  # The userDataObject is required when using a PAT
 
     post_workflow_results_response = stub.PostWorkflowResults(
         service_pb2.PostWorkflowResultsRequest(
-            user_app_id=userDataObject,  
-            workflow_id=WORKFLOW_ID,
+            user_app_id=user_data_object,
+            workflow_id=workflow_id,
             inputs=[
                 resources_pb2.Input(
                     data=resources_pb2.Data(
                         image=resources_pb2.Image(
-                            url=IMAGE_URL
+                            base64=image
                         )
                     )
                 )
@@ -58,6 +68,9 @@ def Generate():
             print("	%s %.2f" % (concept.name, concept.value))
 
     # Uncomment this line to print the full Response JSON
-    #print(results.status)
+    # print(results.status)
 
-    return results
+    outputs = results.outputs
+    result = outputs[-1]
+
+    return result.data.text.raw

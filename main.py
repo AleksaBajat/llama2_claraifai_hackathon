@@ -1,9 +1,12 @@
+import base64
 from clarifai import clarify_text_to_audio, get_data_from_clarify
 import streamlit as st
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 from io import BytesIO
 from PIL import Image
 import numpy as np
+import wave
+from pydub import AudioSegment
 
 st.title("IndieMeta Story Generator")
 
@@ -43,16 +46,35 @@ if bytes_data is not None:
     st.write(tags_text)
 
     sentences = story.split('.')
-    audio_sentences = []
+    audio_segments = []
+    audio_result = b''
     counter = 0
     for i in sentences:
         counter += 1
         st.write(counter)
-
+        if counter == 5:
+            break
         temp = clarify_text_to_audio(i)
-        audio_sentences.append(temp)
-        st.audio(temp, format="audio/wav", start_time=0)
+        st.write('2222222222222222222222222222')
+        kk = base64.b64decode(temp)
+        st.write('111111111111111')
+        temp_audio_file = BytesIO(kk)
+        audio_segment = AudioSegment.from_file(temp_audio_file)
+        st.write('333333333333333333333333333')
+        audio_segments.append(audio_segment)
+        #st.audio(audio_sentences, format="audio/wav", start_time=0)
 
-    concatenated_bytes = b"".join(audio_sentences)
+    #concatenated_bytes = b''.join(audio_sentences)
+    #st.write(concatenated_bytes)
 
-    #st.audio(audio_sentences, format="audio/wav", start_time=0)
+    
+
+    #st.audio(output_file, format="audio/wav", start_time=0)
+
+
+
+    combined = AudioSegment.empty()
+    for seg in audio_segments:
+        combined += seg
+
+    combined.export('final', format="wav")

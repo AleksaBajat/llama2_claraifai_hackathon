@@ -214,7 +214,8 @@ def clarify_text_to_audio(text):
 
 def clarify_image_to_story(image: bytes, user_input: str):
     image_description = clarify_image_description(image)
-    result = clarify_text_to_text(image_description, "Create a short story in a paragraph. {}"
+    st.write("DESC " + image_description)
+    result = clarify_text_to_text(image_description, "Create a short story. {}"
                          .format(user_input)) + " "
 
     last_dot_index = result.rfind(".") + 1

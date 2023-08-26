@@ -141,7 +141,7 @@ def clarify_image_to_hashtags(image: bytes):
 def clarify_image_to_story(image: bytes, user_input: str):
     image_description = clarify_image_description(image)
     st.write("DESC " + image_description)
-    result = clarify_text_to_text(image_description, "Create a short story in a paragraph. {}"
+    result = clarify_text_to_text(image_description, "Create a short story. {}"
                          .format(user_input)) + " "
 
     st.write("RESULT 1" + result)

@@ -7,7 +7,7 @@ import numpy as np
 
 st.title("IndieMeta Story Generator")
 
-description: str = st.text_area('Area for textual entry')
+description: str = st.text_area('Make sure that it contains:')
 
 image: UploadedFile = st.file_uploader("Choose a file", type=["jpeg", "jpg", "png"])
 bytes_data: bytes | None = None
@@ -23,6 +23,12 @@ if bytes_data is not None:
         st.image(img_array, width=300)
 
     story, tags, audio = get_data_from_clarify(description, bytes_data)
+
+    print(story)
+    if story is None:
+        st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
+    elif story.strip() == "":
+        st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
 
     st.write(story)
 

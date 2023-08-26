@@ -141,7 +141,6 @@ def clarify_image_to_hashtags(image: bytes):
 
 @st.cache_data
 def clarify_text_to_audio(text):
-    text = text[:250]
     ######################################################################################################
     # In this section, we set the user authentication, user and app ID, model details, and the URL of 
     # the text we want as an input. Change these strings to run your own example.
@@ -226,6 +225,5 @@ def clarify_image_to_story(image: bytes, user_input: str):
 def get_data_from_clarify(user_input: str, image: bytes) -> str:
     story = clarify_image_to_story(image, user_input)
     tags = clarify_image_to_hashtags(image)
-    audio = clarify_text_to_audio(story)
-    return story, tags, audio
+    return story, tags
 

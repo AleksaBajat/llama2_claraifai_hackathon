@@ -1,4 +1,4 @@
-from clarifai import get_data_from_clarify
+from clarifai import clarify_text_to_audio, get_data_from_clarify
 import streamlit as st
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 from io import BytesIO
@@ -22,7 +22,8 @@ if bytes_data is not None:
     with cent_co:
         st.image(img_array, width=300)
 
-    story, tags, audio = get_data_from_clarify(description, bytes_data)
+    story, tags = get_data_from_clarify(description, bytes_data)
+    
 
     print(story)
     if story is None:
@@ -41,4 +42,17 @@ if bytes_data is not None:
     tags_text = tags_text[:-1]
     st.write(tags_text)
 
-    st.audio(audio, format="audio/wav", start_time=0)
+    sentences = story.split('.')
+    audio_sentences = []
+    counter = 0
+    for i in sentences:
+        counter += 1
+        st.write(counter)
+
+        temp = clarify_text_to_audio(i)
+        audio_sentences.append(temp)
+        st.audio(temp, format="audio/wav", start_time=0)
+
+    concatenated_bytes = b"".join(audio_sentences)
+
+    #st.audio(audio_sentences, format="audio/wav", start_time=0)

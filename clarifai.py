@@ -9,6 +9,7 @@ class Workflow:
     image_to_text_workflow = 'image-to-text'
     image_to_tags_workflow = 'image-to-tags'
 
+
 @st.cache_data
 def get_credentials():
     ##############################################################################
@@ -62,6 +63,39 @@ def clarify_image_description(image: bytes) -> str:
 
 
 @st.cache_data
+def clarify_text_to_text(text: str, prompt: str) -> str:
+    user_id, pat, app_id = get_credentials()
+    user_data_object = resources_pb2.UserAppIDSet(user_id=user_id, app_id=app_id)
+
+    stub = retrieve_clarifai_stub()
+    post_workflow_results_response = stub.PostWorkflowResults(
+        service_pb2.PostWorkflowResultsRequest(
+            user_app_id=user_data_object,
+            workflow_id=Workflow.text_to_text_workflow,
+            inputs=[
+                resources_pb2.Input(
+                    data=resources_pb2.Data(
+                        text=resources_pb2.Text(
+                            raw="{} - {}.".format(text, prompt)
+                        )
+                    )
+                )
+            ]
+        ),
+        metadata=(('authorization', 'Key ' + pat),)
+    )
+
+    if post_workflow_results_response.status.code != status_code_pb2.SUCCESS:
+        print(post_workflow_results_response.status)
+        raise Exception("Post workflow results failed, status: " + post_workflow_results_response.status.description)
+
+    results = post_workflow_results_response.results[0]
+    outputs = results.outputs
+    result = outputs[-1]
+    return result.data.text.raw
+
+
+@st.cache_data
 def clarify_image_to_hashtags(image: bytes):
     user_id, pat, app_id = get_credentials()
 
@@ -71,7 +105,7 @@ def clarify_image_to_hashtags(image: bytes):
 
     post_workflow_results_response = stub.PostWorkflowResults(
         service_pb2.PostWorkflowResultsRequest(
-            user_app_id=user_data_object,  
+            user_app_id=user_data_object,
             workflow_id=Workflow.image_to_tags_workflow,
             inputs=[
                 resources_pb2.Input(
@@ -104,11 +138,21 @@ def clarify_image_to_hashtags(image: bytes):
     return tags
 
 
+def clarify_image_to_story(image: bytes, user_input: str):
+    image_description = clarify_image_description(image)
+    st.write("DESC " + image_description)
+    result = clarify_text_to_text(image_description, "Create a short story in a paragraph. {}"
+                         .format(user_input)) + " "
 
-def get_data_from_clarify(text: str, image: bytes) -> str:
-    image_story = clarify_image_description(image)
+    st.write("RESULT 1" + result)
+    last_dot_index = result.rfind(".") + 1
+
+    result = result[:last_dot_index]
+    st.write("RESULT " + result)
+
+    return result
+
+def get_data_from_clarify(user_input: str, image: bytes) -> str:
+    story = clarify_image_to_story(image, user_input)
     tags = clarify_image_to_hashtags(image)
-    return image_story, tags
-
-
-
+    return story, tags

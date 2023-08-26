@@ -4,6 +4,11 @@ from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.grpc.api.status import status_code_pb2
 
 
+class Workflow:
+    text_to_text_workflow = 'text-to-text'
+    image_to_text_workflow = 'image-to-text'
+    image_to_tags_workflow = 'image-to-tags'
+
 @st.cache_data
 def get_credentials():
     ##############################################################################
@@ -13,9 +18,7 @@ def get_credentials():
     user_id = 'sdragan15'
     pat = '73028d3a4be24e18a7fdad1320333fb0'
     app_id = 'cool_app'
-    workflow_id = 'workflow-306cec'
-    workflow_hashtags_id = 'workflow-f33888'
-    return user_id, pat, app_id, workflow_id, workflow_hashtags_id
+    return user_id, pat, app_id
 
 
 def retrieve_clarifai_stub():
@@ -25,17 +28,16 @@ def retrieve_clarifai_stub():
 
 
 @st.cache_data
-def clarify_image_to_story(text: str, image: bytes) -> str:
-    user_id, pat, app_id, workflow_id, _ = get_credentials()
+def clarify_image_description(image: bytes) -> str:
+    user_id, pat, app_id = get_credentials()
 
-    user_data_object = resources_pb2.UserAppIDSet(user_id=user_id,
-                                                  app_id=app_id)
+    user_data_object = resources_pb2.UserAppIDSet(user_id=user_id, app_id=app_id)
 
     stub = retrieve_clarifai_stub()
     post_workflow_results_response = stub.PostWorkflowResults(
         service_pb2.PostWorkflowResultsRequest(
             user_app_id=user_data_object,
-            workflow_id=workflow_id,
+            workflow_id=Workflow.image_to_text_workflow,
             inputs=[
                 resources_pb2.Input(
                     data=resources_pb2.Data(
@@ -61,17 +63,16 @@ def clarify_image_to_story(text: str, image: bytes) -> str:
 
 @st.cache_data
 def clarify_image_to_hashtags(image: bytes):
-    user_id, pat, app_id, workflow_id, workflow_hashtags_id = get_credentials()
+    user_id, pat, app_id = get_credentials()
 
-    user_data_object = resources_pb2.UserAppIDSet(user_id=user_id,
-                                                  app_id=app_id)
+    user_data_object = resources_pb2.UserAppIDSet(user_id=user_id, app_id=app_id)
 
     stub = retrieve_clarifai_stub()
 
     post_workflow_results_response = stub.PostWorkflowResults(
         service_pb2.PostWorkflowResultsRequest(
             user_app_id=user_data_object,  
-            workflow_id=workflow_hashtags_id,
+            workflow_id=Workflow.image_to_tags_workflow,
             inputs=[
                 resources_pb2.Input(
                     data=resources_pb2.Data(
@@ -105,7 +106,7 @@ def clarify_image_to_hashtags(image: bytes):
 
 
 def get_data_from_clarify(text: str, image: bytes) -> str:
-    image_story = clarify_image_to_story(text, image)
+    image_story = clarify_image_description(image)
     tags = clarify_image_to_hashtags(image)
     return image_story, tags
 

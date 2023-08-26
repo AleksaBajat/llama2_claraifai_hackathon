@@ -22,7 +22,6 @@ if bytes_data is not None:
     with cent_co:
         st.image(img_array, width=300)
 
-
     story, tags = get_data_from_clarify(description, bytes_data)
 
     st.write(story)

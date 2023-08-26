@@ -22,4 +22,16 @@ if bytes_data is not None:
     with cent_co:
         st.image(img_array, width=300)
 
-    st.write(get_data_from_clarify(description, bytes_data))
+
+    story, tags = get_data_from_clarify(description, bytes_data)
+
+    st.write(story)
+
+    st.write('Relevant Hashtags:')
+
+    tags_text = ''
+    for i in tags:
+        tags_text = tags_text + '#' + i.replace(' ', '_') + ' '
+
+    tags_text = tags_text[:-1]
+    st.write(tags_text)

@@ -25,7 +25,7 @@ if bytes_data is not None:
     with cent_co:
         st.image(img_array, width=300)
 
-    story, tags,audio = get_data_from_clarify(description, bytes_data)
+    story, tags, audio = get_data_from_clarify(description, bytes_data)
 
     print(story)
 

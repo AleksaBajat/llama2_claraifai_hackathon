@@ -215,7 +215,7 @@ def merge_audio_streams(audio_streams: list[io.BytesIO], output_format="wav"):
 
 
 def clarify_story_to_audio(story: str):
-    sentences = story.split('.')
+    sentences = story.split(['.', '!', '?'])
     base64_segments = []
     for sentence in sentences:
         retries = 3

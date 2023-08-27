@@ -249,6 +249,7 @@ def clarify_story_to_audio(story: str):
                 break;
             except Exception as e:
                 count += 1
+                print(e)
                 pass
 
     audio_streams = [io.BytesIO(data) for data in base64_segments]

@@ -4,6 +4,7 @@ from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.grpc.api.status import status_code_pb2
 import base64
+import wave
 
 from pydub import AudioSegment
 
@@ -228,9 +229,8 @@ def merge_audio_streams(audio_streams: list[io.BytesIO], output_format="wav"):
     combined_audio = AudioSegment.empty()
     for audio_stream in audio_streams:
         audio_stream.seek(0)
-        audio = AudioSegment.from_file(audio_stream)
+        audio = AudioSegment.from_wav(audio_stream)
         combined_audio += audio
-        break;
 
     merged_audio_stream = io.BytesIO()
     combined_audio.export(merged_audio_stream, format=output_format)
@@ -243,11 +243,10 @@ def clarify_story_to_audio(story: str):
     for sentence in sentences:
         try:
             base64_segments.append(clarify_text_to_audio(sentence))
-            break;
         except Exception as e:
             pass
 
-    audio_streams = [decode_base64_to_audio_stream(data) for data in base64_segments]
+    audio_streams = [io.BytesIO(data) for data in base64_segments]
 
     merged_audio_stream = merge_audio_streams(audio_streams)
     return merged_audio_stream

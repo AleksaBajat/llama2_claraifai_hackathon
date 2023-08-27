@@ -13,7 +13,7 @@ st.title("IndieMeta Story Generator")
 description: str = st.text_area('Make sure that it contains:')
 
 image: UploadedFile = st.file_uploader("Choose a file", type=["jpeg", "jpg", "png"])
-bytes_data: bytes | None = None
+bytes_data = None
 if image is not None:
     bytes_data: bytes = image.getvalue()
 

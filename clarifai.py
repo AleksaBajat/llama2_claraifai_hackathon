@@ -241,11 +241,14 @@ def clarify_story_to_audio(story: str):
     sentences = story.split('.')
     base64_segments = []
     for sentence in sentences:
-        while True:
+        retries = 3
+        count = 0
+        while count < retries:
             try:
                 base64_segments.append(clarify_text_to_audio(sentence))
                 break;
             except Exception as e:
+                count += 1
                 pass
 
     audio_streams = [io.BytesIO(data) for data in base64_segments]

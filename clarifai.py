@@ -7,6 +7,7 @@ from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.grpc.api.status import status_code_pb2
 import base64
+import re
 
 from pydub import AudioSegment
 
@@ -142,6 +143,8 @@ def clarify_image_to_hashtags(image: bytes):
 
     tags_text = ''
     for i in tags:
+        if i == 'no person':
+            continue
         tags_text = tags_text + '#' + i.replace(' ', '_') + ' '
 
     tags_text = tags_text[:-1]
@@ -215,7 +218,7 @@ def merge_audio_streams(audio_streams: list[io.BytesIO], output_format="wav"):
 
 
 def clarify_story_to_audio(story: str):
-    sentences = story.split(['.', '!', '?'])
+    sentences = re.split(r'[,\?!]', story)
     base64_segments = []
     for sentence in sentences:
         retries = 3

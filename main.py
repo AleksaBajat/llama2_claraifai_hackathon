@@ -8,7 +8,7 @@ import numpy as np
 import wave
 from pydub import AudioSegment
 
-st.title("IndieMeta Story Generator")
+st.title("StoryCrafts")
 
 description: str = st.text_area('Make sure that it contains:')
 

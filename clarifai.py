@@ -1,4 +1,6 @@
 import io
+import os
+
 import streamlit as st
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
@@ -24,6 +26,7 @@ def get_credentials():
     ##############################################################################
     user_id = 'sdragan15'
     pat = '73028d3a4be24e18a7fdad1320333fb0'
+    pat = os.getenv("CLARIFAI_PERSONAL_ACCESS_TOKEN")
     app_id = 'cool_app'
     return user_id, pat, app_id
 
@@ -151,40 +154,18 @@ def clarify_image_to_hashtags(image: bytes):
 
 @st.cache_data
 def clarify_text_to_audio(text):
-    ######################################################################################################
-    # In this section, we set the user authentication, user and app ID, model details, and the URL of 
-    # the text we want as an input. Change these strings to run your own example.
-    ######################################################################################################
-
-    # Your PAT (Personal Access Token) can be found in the portal under Authentification
-    PAT = '73028d3a4be24e18a7fdad1320333fb0'
-    # Specify the correct user_id/app_id pairings
-    # Since you're making inferences outside your app's scope
-    USER_ID = 'sdragan15'
-    APP_ID = 'cool_app'
-    # Change these to whatever model and text URL you want to use
-    WORKFLOW_ID = 'text-to-audio'
-    TEXT_FILE_URL = 'https://samples.clarifai.com/negative_sentence_12.txt'
-
-    ############################################################################
-    # YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-    ############################################################################
-
-    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
-    from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
-    from clarifai_grpc.grpc.api.status import status_code_pb2
-
+    user_id, pat, app_id = get_credentials()
     channel = ClarifaiChannel.get_grpc_channel()
     stub = service_pb2_grpc.V2Stub(channel)
 
-    metadata = (('authorization', 'Key ' + PAT),)
+    metadata = (('authorization', 'Key ' + pat),)
 
-    userDataObject = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
+    userDataObject = resources_pb2.UserAppIDSet(user_id=user_id, app_id=app_id)
 
     post_workflow_results_response = stub.PostWorkflowResults(
         service_pb2.PostWorkflowResultsRequest(
             user_app_id=userDataObject,
-            workflow_id=WORKFLOW_ID,
+            workflow_id=Workflow.text_to_audio_workflow,
             inputs=[
                 resources_pb2.Input(
                     data=resources_pb2.Data(

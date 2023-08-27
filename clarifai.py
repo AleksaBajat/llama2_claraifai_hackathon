@@ -243,7 +243,11 @@ def clarify_image_to_story(image: bytes, user_input: str):
     result = clarify_text_to_text(image_description, "Create a short story. {}".format(user_input)) + " "
 
     last_dot_index = result.rfind(".") + 1
-    result = result[:last_dot_index]
+    last_question_mark_index = result.find("?") + 1
+    last_exclamation_mark_index = result.find("!") + 1
+
+    max_idx = max(last_dot_index, last_question_mark_index, last_exclamation_mark_index)
+    result = result[:max_idx]
 
     return result
 

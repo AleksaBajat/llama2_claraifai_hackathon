@@ -227,7 +227,7 @@ def clarify_story_to_audio(story: str):
         while count < retries:
             try:
                 base64_segments.append(clarify_text_to_audio(sentence))
-                break;
+                break
             except Exception as e:
                 count += 1
                 print(e)
@@ -250,14 +250,11 @@ def clarify_image_to_story(image: bytes, user_input: str):
 
 
 def get_data_from_clarify(user_input: str, image: bytes) -> str:
-    audio = None
     story = clarify_image_to_story(image, user_input)
     if story is None:
         st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
     elif story.strip() == "":
         st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
-    else:
-        audio = clarify_story_to_audio(story)
 
     tags = clarify_image_to_hashtags(image)
-    return story, tags, audio
+    return story, tags

@@ -1,5 +1,5 @@
 import base64
-from clarifai import clarify_text_to_audio, get_data_from_clarify
+from clarifai import clarify_story_to_audio, clarify_text_to_audio, get_data_from_clarify
 import streamlit as st
 from streamlit.runtime.uploaded_file_manager import UploadedFile
 from io import BytesIO
@@ -25,7 +25,7 @@ if bytes_data is not None:
     with cent_co:
         st.image(img_array, width=300)
 
-    story, tags, audio = get_data_from_clarify(description, bytes_data)
+    story, tags = get_data_from_clarify(description, bytes_data)
 
     print(story)
 
@@ -34,6 +34,10 @@ if bytes_data is not None:
     st.write('Relevant Hashtags:')
 
     st.write(tags)
+
+    audio = None
+    if story.strip() != "":
+        audio = clarify_story_to_audio(story)
 
     if audio is not None:
         st.audio(audio, format="audio/wav", start_time=0)

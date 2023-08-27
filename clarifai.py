@@ -1,12 +1,12 @@
 import io
 import os
+from dotenv import load_dotenv
 
 import streamlit as st
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.grpc.api.status import status_code_pb2
 import base64
-import wave
 
 from pydub import AudioSegment
 
@@ -20,12 +20,8 @@ class Workflow:
 
 @st.cache_data
 def get_credentials():
-    ##############################################################################
-    # In this section, we set the user authentication, app ID, workflow ID, and
-    # image URL. Change these strings to run your own example.
-    ##############################################################################
     user_id = 'sdragan15'
-    pat = '73028d3a4be24e18a7fdad1320333fb0'
+    load_dotenv()
     pat = os.getenv("CLARIFAI_PERSONAL_ACCESS_TOKEN")
     app_id = 'cool_app'
     return user_id, pat, app_id

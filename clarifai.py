@@ -1,7 +1,11 @@
+import io
 import streamlit as st
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
 from clarifai_grpc.grpc.api.status import status_code_pb2
+import base64
+
+from pydub import AudioSegment
 
 
 class Workflow:
@@ -65,8 +69,6 @@ def clarify_image_description(image: bytes) -> str:
 
 @st.cache_data
 def clarify_text_to_text(text: str, prompt: str) -> str:
-    st.write(text)
-    st.write(prompt)
     user_id, pat, app_id = get_credentials()
     user_data_object = resources_pb2.UserAppIDSet(user_id=user_id, app_id=app_id)
 
@@ -175,7 +177,7 @@ def clarify_text_to_audio(text):
 
     post_workflow_results_response = stub.PostWorkflowResults(
         service_pb2.PostWorkflowResultsRequest(
-            user_app_id=userDataObject,  
+            user_app_id=userDataObject,
             workflow_id=WORKFLOW_ID,
             inputs=[
                 resources_pb2.Input(
@@ -206,26 +208,53 @@ def clarify_text_to_audio(text):
 
     # Uncomment this line to print the full Response JSON
 
-    
     outputs = results.outputs
     last = outputs[-1]
-    
+
     return last.data.audio.base64
+
+
+def decode_base64_to_audio_stream(base64_string):
+    audio_data = base64.b64decode(base64_string)
+    return io.BytesIO(audio_data)
+
+
+def merge_audio_streams(audio_streams: list[io.BytesIO], output_format="wav"):
+    combined_audio = AudioSegment.empty()
+    for audio_stream in audio_streams:
+        audio_stream.seek(0)
+        audio = AudioSegment.from_file(audio_stream, format=output_format)
+        combined_audio += audio
+
+    merged_audio_stream = io.BytesIO()
+    combined_audio.export(merged_audio_stream, format=output_format)
+    return merged_audio_stream
+
+
+def clarify_story_to_audio(story: str):
+    sentences = story.split('.')
+    base64_segments = []
+    for sentence in sentences:
+        base64_segments.append(clarify_text_to_audio(sentence))
+
+    audio_streams = [decode_base64_to_audio_stream(data) for data in base64_segments]
+
+    merged_audio_stream = merge_audio_streams(audio_streams)
+    return merged_audio_stream
 
 
 def clarify_image_to_story(image: bytes, user_input: str):
     image_description = clarify_image_description(image)
-    st.write("DESC " + image_description)
     result = clarify_text_to_text(image_description, "Create a short story. {}".format(user_input)) + " "
 
     last_dot_index = result.rfind(".") + 1
-
     result = result[:last_dot_index]
 
     return result
 
+
 def get_data_from_clarify(user_input: str, image: bytes) -> str:
     story = clarify_image_to_story(image, user_input)
     tags = clarify_image_to_hashtags(image)
-    return story, tags
-
+    audio = clarify_story_to_audio(story)
+    return story, tags, audio

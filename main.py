@@ -26,24 +26,15 @@ if bytes_data is not None:
         st.image(img_array, width=300)
 
     story, tags,audio = get_data_from_clarify(description, bytes_data)
-    
 
     print(story)
-    if story is None:
-        st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
-    elif story.strip() == "":
-        st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
 
     st.write(story)
 
     st.write('Relevant Hashtags:')
 
-    tags_text = ''
-    for i in tags:
-        tags_text = tags_text + '#' + i.replace(' ', '_') + ' '
+    st.write(tags)
 
-    tags_text = tags_text[:-1]
-    st.write(tags_text)
-
-    st.audio(audio, format="audio/wav", start_time=0)
+    if audio is not None:
+        st.audio(audio, format="audio/wav", start_time=0)
 

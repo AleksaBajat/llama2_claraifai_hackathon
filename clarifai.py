@@ -140,7 +140,12 @@ def clarify_image_to_hashtags(image: bytes):
             print("	%s %.2f" % (concept.name, concept.value))
             tags.append(concept.name)
 
-    return tags
+    tags_text = ''
+    for i in tags:
+        tags_text = tags_text + '#' + i.replace(' ', '_') + ' '
+
+    tags_text = tags_text[:-1]
+    return tags_text
 
 
 @st.cache_data
@@ -254,7 +259,14 @@ def clarify_image_to_story(image: bytes, user_input: str):
 
 
 def get_data_from_clarify(user_input: str, image: bytes) -> str:
+    audio = None
     story = clarify_image_to_story(image, user_input)
+    if story is None:
+        st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
+    elif story.strip() == "":
+        st.write("Mighty AI was not inspired to write a story for this image with the particular parameters. Maybe try something else?")
+    else:
+        audio = clarify_story_to_audio(story)
+
     tags = clarify_image_to_hashtags(image)
-    audio = clarify_story_to_audio(story)
     return story, tags, audio
